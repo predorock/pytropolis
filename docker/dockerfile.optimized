@@ -1,0 +1,28 @@
+# use a smaller base image
+FROM python:3.9-alpine
+
+# set the working directory in the container to /app
+WORKDIR /app
+
+# copy the requirements.txt file into the container at /app
+COPY requirements.txt .
+
+# install the dependencies and remove unnecessary files
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apk del .build-deps \
+    && rm -rf /root/.cache \
+    && rm -rf requirements.txt
+
+# use multi-stage builds
+FROM python:3.9-alpine
+COPY --from=0 /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=0 /app /app
+
+# expose port 5000 for the Flask app to listen on
+EXPOSE 5000
+
+# start the Flask app
+CMD ["python", "app.py"]

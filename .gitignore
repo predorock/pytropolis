@@ -1,0 +1,13 @@
+# Compiled python files
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+env/
+
+# Log files
+volumes/
+
+# Dependencies installed by pip
+#requirements.txt
