@@ -1,14 +1,21 @@
-import os
+import json
 import requests
 
-url = 'http://localhost:5000/runscript'
+url = 'http://localhost:5000/run'
 
 # Set up the files to send with the request
 script_file = open('../resources/hello/ascii_title.py', 'rb')
 requirements_file = open('../resources/hello/requirements.txt', 'rb')
 
+data = {
+    'script_name': 'ascii_title',
+    'venv_name': 'ascii_title'
+}
+
+files = {'script': script_file, 'requirements': requirements_file}
+
 # Send the request and get the response
-response = requests.post(url, files={'script': script_file, 'requirements': requirements_file})
+response = requests.post(url, data=data, files=files)
 
 # Close the file objects
 script_file.close()
@@ -17,7 +24,7 @@ requirements_file.close()
 # Check for errors and print the result
 if response.ok:
     result = response.json()
-    print(f"Script execution result:\n{result}")
+    print(f"Script execution result:\n{json.dumps(result, indent=2)}")
 else:
-    error = response.json()
+    error = response.reason
     print(f"Error executing script:\n{error}")

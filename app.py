@@ -1,81 +1,112 @@
 import os
-import subprocess
-import logging
 import uuid
+import subprocess
 from flask import Flask, jsonify, request
+
+from lib.una_config import get_configuration, configuration_setup
+from lib.una_runner import create_or_get_virtualenv_path, install_dependencies, run_python_script, get_log_file_name
+from lib.una_queue import queue_init, create_message, subscribe_to_topic
 
 app = Flask(__name__)
 
-log_dir = os.environ.get('LOG_DIR', os.path.join(os.getcwd(), 'logs'))
-if not os.path.exists(log_dir):
-    os.mkdir(log_dir)
+def handle_script_execution(script_path, requirements_path, venv_name, execution_id=uuid.uuid4()):
+    
+    # extract configurations
+    cfg = get_configuration()
+    venv_container = cfg['venv_container']
+    log_dir = cfg['log_dir']
 
-venv_path = os.path.join(os.getcwd(), 'venv')
+    # Create or activate virtual environment
+    venv_path = create_or_get_virtualenv_path(venv_container, venv_name)
+    
+    # Install dependencies
+    try:
+        install_dependencies(requirements_path, venv_path)
+    except subprocess.CalledProcessError as e:
+        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Error installing dependencies.'})
+    
+    # get the file name of the script
+    script_name = os.path.basename(script_path)
 
+    # Execute script
+    log_file = os.path.join(log_dir, get_log_file_name(script_name, execution_id))
+    try:
+        run_python_script(script_path, log_file, venv_path)
+        return jsonify({'output_log': log_file, 'venv_name': venv_name, 'result': 'success', 'message': 'Script executed successfully.'})
+    except subprocess.CalledProcessError as e:
+        return jsonify({'output_log': log_file, 'venv_name': venv_name, 'result': 'error', 'message': 'Error executing script.'})
 
-@app.route('/runscript', methods=['POST'])
-def run_script():
+def parse_request(request):
     """
-    Receives a Python script and requirements file from the request, installs any dependencies listed in the requirements
-    file in the fixed virtual environment, runs the script with the given file path in the fixed virtual environment,
-    and logs the output to a file. The path to the log file and the result of running the script are returned as a JSON response.
+    Parses the request and returns the script file path, requirements file path, and virtual environment name.
     """
     script_file = request.files['script']
     requirements_file = request.files['requirements']
 
+    # check if the files are not null
+    if not script_file:
+        return None, None, None, None, None
+    
+    if not requirements_file:
+        return None, None, None, None, None
+
+    cfg = get_configuration()
+
+    # retrieve optional configurations
+    try:
+        venv_name = request.form.get('venv_name')
+    except KeyError:
+        venv_name = 'default'
+    
+    try:
+        script_name = request.form.get('script_name')
+    except KeyError:
+        script_name = 'algo'
+    
+    # create an exectution directory with uuid
+    execution_id = str(uuid.uuid4())
+    execution_dir = os.path.join(cfg['execution_dir'],f'{script_name}_{execution_id}')
+    
+    # make the execution directory if not exists recursively
+    if not os.path.exists(execution_dir):
+        os.makedirs(execution_dir)
+
     # Save files to disk
-    script_path = os.path.join(os.getcwd(), 'received_script.py')
-    requirements_path = os.path.join(os.getcwd(), 'received_requirements.txt')
+    script_path = os.path.join(execution_dir, f'{script_name}.py')
     script_file.save(script_path)
+
+    requirements_path = os.path.join(execution_dir, 'requirements.txt')
     requirements_file.save(requirements_path)
 
-    # Install dependencies
-    try:
-        install_dependencies(requirements_path)
-    except subprocess.CalledProcessError as e:
-        return jsonify({'output_log': None, 'result': 'error'})
+    return script_path, requirements_path, venv_name, execution_dir, execution_id
 
-    # Execute script
-    log_file = os.path.join(log_dir, get_log_file_name(script_file.filename))
-    try:
-        run_python_script(script_path, log_file)
-        return jsonify({'output_log': log_file, 'result': 'success'})
-    except subprocess.CalledProcessError as e:
-        return jsonify({'output_log': log_file, 'result': 'error'})
+# health check endpoint
+@app.route('/health', methods=['GET'])
+def health():
+    return 'OK'
 
+@app.route('/run', methods=['POST'])
+def run_script():
+    # parse the request
+    script_path, requirements_path, venv_name, execution_dir, execution_id = parse_request(request)
+    
+    # check if the files are not null
+    if script_path is None:
+        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Script file is null.'})
+    if requirements_path is None:
+        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Requirements file is null.'})
+    
+    # run the script
+    return handle_script_execution(script_path, requirements_path, venv_name, execution_id)
 
-def install_dependencies(requirements_path):
-    """
-    Installs any dependencies listed in the given requirements file.
-    """
-    subprocess.check_output([os.path.join(venv_path, 'bin', 'pip'), 'install', '-r', requirements_path])
-
-
-def run_python_script(script_path, log_file):
-    """
-    Runs the specified Python script using the Python interpreter in the fixed virtual environment,
-    and redirects the logs to a file.
-    """
-    logging.basicConfig(filename=log_file, level=logging.INFO)
-    logging.info(f"Executing script: {script_path}")
-
-    # Open the process with the subprocess.PIPE stdout
-    process = subprocess.Popen([os.path.join(venv_path, 'bin', 'python'), script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # Read the output of the process
-    output, _ = process.communicate()
-    # Write the output to the log file
-    with open(log_file, 'w') as f:
-        f.write(output.decode())
-
-    return output
-
-
-def get_log_file_name(script_name):
-    """
-    Returns a unique log file name with the specified script name as prefix.
-    """
-    return f"{script_name.split('.')[0]}_{uuid.uuid4()}.log"
-
+@app.route('/enqueue', methods=['POST'])
+def enqueue_execution():
+    # parse the request
+    script_path, requirements_path, venv_name = parse_request(request)
+    # enqueue the script
+    return handle_script_execution(script_path, requirements_path, venv_name)
 
 if __name__ == '__main__':
+    configuration_setup()
+    #queue_init()
     app.run()
