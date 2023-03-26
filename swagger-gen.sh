@@ -1,0 +1,1 @@
+flaskswagger app:app --out-dir static/

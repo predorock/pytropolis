@@ -1,13 +1,30 @@
 import os
 import uuid
 import subprocess
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory, redirect
+from flask_swagger_ui import get_swaggerui_blueprint
 
 from lib.una_config import get_configuration, configuration_setup
 from lib.una_runner import create_or_get_virtualenv_path, install_dependencies, run_python_script, get_log_file_name
 from lib.una_queue import queue_init, create_message, subscribe_to_topic
 
 app = Flask(__name__)
+
+SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
+API_URL = 'http://127.0.0.1:5000/static/swagger.json'  # Our API url (can of course be a local resource)
+
+# Create Swagger UI blueprint
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Python Script Executor"
+    }
+)
+
+# Register the blueprint with the Flask app
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
 
 def handle_script_execution(script_path, requirements_path, venv_name, execution_id=uuid.uuid4()):
     
@@ -80,13 +97,78 @@ def parse_request(request):
 
     return script_path, requirements_path, venv_name, execution_dir, execution_id
 
+@app.route('/')
+def hello():
+    return redirect("/api/docs", code=302)
+
 # health check endpoint
 @app.route('/health', methods=['GET'])
 def health():
+    """
+    Health Check
+    ---
+    responses:
+      200:
+        description: OK
+    """
     return 'OK'
 
-@app.route('/run', methods=['POST'])
+
+@app.route('/static/<path:path>')
+def send_report(path):
+    return send_from_directory('static', path)
+
+@app.route('/api/run', methods=['POST'])
 def run_script():
+    """
+    Execute a script
+    ---
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: script
+        in: formData
+        type: file
+        required: true
+        description: The Python script to execute.
+      - name: requirements
+        in: formData
+        type: file
+        required: true
+        description: The requirements file for the script.
+      - name: venv_name
+        in: formData
+        type: string
+        required: false
+        default: default
+        description: The name of the virtual environment to use.
+      - name: script_name
+        in: formData
+        type: string
+        required: false
+        default: algo
+        description: The name of the script.
+    responses:
+      200:
+        description: Success
+        schema:
+          id: execution_result
+          properties:
+            output_log:
+              type: string
+              description: The path to the log file containing the script's output.
+            venv_name:
+              type: string
+              description: The name of the virtual environment used.
+            result:
+              type: string
+              description: The result of the script execution ('success' or 'error').
+            message:
+              type: string
+              description: A message describing the result of the script execution.
+      400:
+        description: Bad Request
+    """
     # parse the request
     script_path, requirements_path, venv_name, execution_dir, execution_id = parse_request(request)
     
@@ -99,8 +181,57 @@ def run_script():
     # run the script
     return handle_script_execution(script_path, requirements_path, venv_name, execution_id)
 
-@app.route('/enqueue', methods=['POST'])
+@app.route('/api/enqueue', methods=['POST'])
 def enqueue_execution():
+    """
+    Enqueue a script
+    ---
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: script
+        in: formData
+        type: file
+        required: true
+        description: The Python script to execute.
+      - name: requirements
+        in: formData
+        type: file
+        required: true
+        description: The requirements file for the script.
+      - name: venv_name
+        in: formData
+        type: string
+        required: false
+        default: default
+        description: The name of the virtual environment to use.
+      - name: script_name
+        in: formData
+        type: string
+        required: false
+        default: algo
+        description: The name of the script.
+    responses:
+      200:
+        description: Success
+        schema:
+          id: execution_result
+          properties:
+            output_log:
+              type: string
+              description: The path to the log file containing the script's output.
+            venv_name:
+              type: string
+              description: The name of the virtual environment used.
+            result:
+              type: string
+              description: The result of the script execution ('success' or 'error').
+            message:
+              type: string
+              description: A message describing the result of the script execution.
+      400:
+        description: Bad Request
+    """
     # parse the request
     script_path, requirements_path, venv_name = parse_request(request)
     # enqueue the script
