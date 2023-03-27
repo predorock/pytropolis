@@ -1,7 +1,5 @@
 import os
 
-from .una_runner import create_or_get_virtualenv_path
-
 def get_configuration():
     home_dir = os.environ.get('HOME_DIR', os.path.join(os.getcwd(), 'una-py-runtime'))
     execution_dir = os.environ.get('EXECUTION_DIR', os.path.join(os.getcwd(), home_dir, 'executions'))
@@ -11,6 +9,9 @@ def get_configuration():
     redis_host = os.environ.get('REDIS_HOST', 'localhost')
     redis_port = int(os.environ.get('REDIS_PORT', '6379'))
     redis_db = int(os.environ.get('REDIS_DB', '0'))
+    redis_url = 'redis://{}:{}/{}'.format(redis_host, redis_port, redis_db)
+    #topics
+    topic_execution = os.environ.get('TOPIC_EXECUTION', 'una.py.runtime')
     
     return {
         'home_dir': home_dir,
@@ -20,7 +21,9 @@ def get_configuration():
         'venv_default': venv_default,
         'redis_host': redis_host,
         'redis_port': redis_port,
-        'redis_db': redis_db
+        'redis_db': redis_db,
+        'redis_url': redis_url,
+        'topic_execution': topic_execution
     }
 
 def configuration_setup():
@@ -37,6 +40,5 @@ def configuration_setup():
         if not os.path.exists(d):
             os.mkdir(d)
 
-    if not os.path.exists(cfg['venv_default']):
-        create_or_get_virtualenv_path(cfg['venv_container'], 'default')
+    return cfg
 

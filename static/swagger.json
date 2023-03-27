@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.0.0",
-        "title": "Cool product name"
+        "version": "0.0.1",
+        "title": "UNA Python Runtime"
     },
     "paths": {
         "/health": {
