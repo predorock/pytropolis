@@ -3,7 +3,7 @@ from flask import jsonify, request, Blueprint
 from lib.blueprints.common import parse_request
 from lib.runner import handle_script_execution
 
-runner_bp = Blueprint('una-runer', __name__,)
+runner_bp = Blueprint('runner_bp', __name__,)
 
 @runner_bp.route('/api/run', methods=['POST'])
 def run_script():

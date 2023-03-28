@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.0.1",
-        "title": "UNA Python Runtime"
+        "version": "0.0.0",
+        "title": "Cool product name"
     },
     "paths": {
         "/health": {
@@ -119,6 +119,20 @@
                     "multipart/form-data"
                 ]
             }
+        },
+        "/api/venv": {
+            "get": {
+                "summary": "Get the list of virtual environments",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/venv_list"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -139,6 +153,17 @@
                 "message": {
                     "type": "string",
                     "description": "A message describing the result of the script execution."
+                }
+            }
+        },
+        "venv_list": {
+            "properties": {
+                "venv_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "The name of a virtual environment."
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 from flask import Blueprint, send_from_directory, redirect
-core = Blueprint('core', __name__,)
+
+core = Blueprint('core',__name__,)
 
 @core.route('/')
 def hello():
@@ -18,6 +19,6 @@ def health():
     return 'OK'
 
 
-@core.route('/static/<path:path>')
+@core.route('/static/<path:path>', methods=['GET'])
 def send_report(path):
     return send_from_directory('static', path)

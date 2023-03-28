@@ -6,7 +6,7 @@ from lib.configuration.una_config import get_configuration
 from lib.blueprints.common import parse_request
 from lib.tasks.runner_task import python_env_runner_task
 
-queue_bp = Blueprint('una_queue', __name__,)
+queue_bp = Blueprint('queue_bp', __name__,)
 
 @queue_bp.route('/api/enqueue', methods=['POST'])
 def enqueue_execution():

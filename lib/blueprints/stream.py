@@ -2,7 +2,7 @@
 from flask import Blueprint, Response
 from lib.una_broker import get_publisher, get_configuration
 
-steam_bp = Blueprint('runner', __name__,)
+steam_bp = Blueprint('stream_bp', __name__,)
 
 def event_stream():
     pubsub = get_publisher().pubsub(ignore_subscribe_messages=True)
