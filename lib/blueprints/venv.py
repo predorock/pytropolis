@@ -1,7 +1,7 @@
 import os
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from lib.configuration.una_config import get_configuration
-
+from lib.runner.una_runner import create_or_get_virtualenv_path, install_dependencies
 
 venv_bp = Blueprint('venv_bp', __name__)
 # returns the list of virtual environments
@@ -36,3 +36,110 @@ def get_venv_list():
         data[venv] = venv_packages
     # return the list of virtual environments
     return jsonify({'venv_list': data})
+
+
+# creates a new virtual environment
+@venv_bp.route('/api/venv', methods=['POST'])
+def create_venv():
+    """
+    Create a new virtual environment
+    ---
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: venv_name
+        in: formData
+        type: string
+        required: true
+        description: The name of the virtual environment to create.
+    responses:
+      200:
+        description: Success
+        schema:
+          id: venv_creation_result
+          properties:
+            message:
+              type: string
+              description: A message describing the result of the virtual environment creation.
+            venv_path:
+              type: string
+              description: The path to the virtual environment.
+      400:
+        description: Bad Request
+    """
+    # get virtual environment name
+    venv_name = request.form['venv_name']
+    # get the venv container path
+    venv_container_path = get_configuration()['venv_container']
+    # if the venv already exists return an error
+    if os.path.isdir(os.path.join(venv_container_path, venv_name)):
+        return jsonify({'message': f'Virtual environment {venv_name} already exists.'}), 400
+    # create the virtual environment
+    venv_path = create_or_get_virtualenv_path(venv_container_path, venv_name, False)
+
+    return jsonify({'message': f'Virtual environment {venv_name} created.', 'venv_path': venv_path}), 200
+
+
+# updata a virtual environment with a requirements file
+@venv_bp.route('/api/venv', methods=['PUT'])
+def update_venv():
+    """
+    Update a virtual environment with a requirements file
+    """
+    # get virtual environment name
+    venv_name = request.form['venv_name']
+    # get the requirements file
+    requirements_file = request.files['requirements_file']
+    # get the venv container path
+    venv_container_path = get_configuration()['venv_container']
+    # if the venv already exists return an error
+    if not os.path.isdir(os.path.join(venv_container_path, venv_name)):
+        return jsonify({'message': f'Virtual environment {venv_name} does not exist.'}), 400
+    # create the virtual environment
+    venv_path = create_or_get_virtualenv_path(venv_container_path, venv_name, True)
+    # install the requirements
+    install_dependencies(venv_path, requirements_file)
+
+    return jsonify({'message': f'Virtual environment {venv_name} updated.', 'venv_path': venv_path}), 200
+
+# deletes a virtual environment
+@venv_bp.route('/api/venv', methods=['DELETE'])
+def delete_venv():
+    """
+    Delete a virtual environment
+    ---
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: venv_name
+        in: formData
+        type: string
+        required: true
+        description: The name of the virtual environment to delete.
+    responses:
+      200:
+        description: Success
+        schema:
+          id: venv_deletion_result
+          properties:
+            message:
+              type: string
+              description: A message describing the result of the virtual environment deletion.
+    """
+    # get virtual environment name
+    venv_name = request.form['venv_name']
+    # get the venv container path
+    venv_container_path = get_configuration()['venv_container']
+
+    # if the name of the environment is 'default' return an error
+    if venv_name == 'default':
+        return jsonify({'message': f'Virtual environment {venv_name} cannot be deleted.'}), 400
+    
+    # if the venv does not exist return an error
+    if not os.path.isdir(os.path.join(venv_container_path, venv_name)):
+        return jsonify({'message': f'Virtual environment {venv_name} does not exist.'}), 400
+    # delete the virtual environment
+    venv_path = os.path.join(venv_container_path, venv_name)
+    os.system(f'rm -rf {venv_path}')
+
+    return jsonify({'message': f'Virtual environment {venv_name} deleted.'}), 200

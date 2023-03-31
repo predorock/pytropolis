@@ -1,6 +1,8 @@
 from flask import Blueprint, send_from_directory, redirect
 
-core = Blueprint('core',__name__,)
+import os
+
+core = Blueprint('core',__name__)
 
 @core.route('/')
 def hello():
@@ -19,6 +21,7 @@ def health():
     return 'OK'
 
 
-@core.route('/static/<path:path>', methods=['GET'])
+@core.route('/files/<path:path>', methods=['GET'])
 def send_report(path):
-    return send_from_directory('static', path)
+    s_folder = os.path.join(os.getcwd(), 'static')
+    return send_from_directory(s_folder, path)

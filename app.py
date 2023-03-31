@@ -9,8 +9,17 @@ from lib.configuration.una_config import configuration_setup
 from lib.runner.una_runner import create_or_get_virtualenv_path
 
 
-app = create_server()
-cli = FlaskGroup(create_app=create_server)
+"""
+    Swagger generation need an attribute that contains the Flask application.
+    But the Flask application is created in the create_app function with the FlaskGroup.
+    So I create a function that returns the Flask application and I pass it to the FlaskGroup in order to make everyone happy.
+"""
+server = create_server()
+def create_for_group():
+    return server
+
+
+cli = FlaskGroup(create_app=create_for_group)
 
 def init_venv(cfg):
     if not os.path.exists(cfg['venv_default']):

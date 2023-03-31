@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.0.0",
-        "title": "Cool product name"
+        "version": "0.0.1",
+        "title": "Una Python Runtime"
     },
     "paths": {
         "/health": {
@@ -132,6 +132,57 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "summary": "Create a new virtual environment",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/venv_creation_result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "venv_name",
+                        "in": "formData",
+                        "type": "string",
+                        "required": true,
+                        "description": "The name of the virtual environment to create."
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ]
+            },
+            "delete": {
+                "summary": "Delete a virtual environment",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/venv_deletion_result"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "venv_name",
+                        "in": "formData",
+                        "type": "string",
+                        "required": true,
+                        "description": "The name of the virtual environment to delete."
+                    }
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ]
             }
         }
     },
@@ -164,6 +215,26 @@
                         "type": "string",
                         "description": "The name of a virtual environment."
                     }
+                }
+            }
+        },
+        "venv_creation_result": {
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "A message describing the result of the virtual environment creation."
+                },
+                "venv_path": {
+                    "type": "string",
+                    "description": "The path to the virtual environment."
+                }
+            }
+        },
+        "venv_deletion_result": {
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "A message describing the result of the virtual environment deletion."
                 }
             }
         }

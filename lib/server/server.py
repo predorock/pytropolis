@@ -1,6 +1,5 @@
+import os
 from flask import Flask
-
-from lib.configuration.una_config import configuration_setup
 
 # Blueprints
 from lib.blueprints.core import core
@@ -11,7 +10,9 @@ from lib.blueprints.stream import steam_bp
 from lib.blueprints.venv import venv_bp
 
 def create_server():
-    app = Flask(__name__)
+    app = Flask(__name__,
+                static_folder=os.path.join(os.getcwd(), "static"),
+                template_folder=os.path.join(os.getcwd(), "templates"))
     app.register_blueprint(core)
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
     app.register_blueprint(runner_bp)
@@ -20,5 +21,8 @@ def create_server():
     app.register_blueprint(venv_bp)
 
     app.shell_context_processor({"app": app})
+
+    if app.debug:
+        print(app.url_map)
 
     return app

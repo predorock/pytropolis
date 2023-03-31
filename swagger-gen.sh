@@ -1,1 +1,1 @@
-flaskswagger app:app --out-dir static/
+flaskswagger app:server --template static/swagger.template.json --out-dir static/
