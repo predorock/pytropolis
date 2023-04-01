@@ -31,7 +31,7 @@ def run_worker():
     cfg = configuration_setup()
     redis_connection = redis.from_url(cfg['redis_url'])
     with Connection(redis_connection):
-        worker = Worker(queues=['una_queue'])
+        worker = Worker(queues=[cfg['execution_queue']])
         worker.work()
 
 if __name__ == "__main__":

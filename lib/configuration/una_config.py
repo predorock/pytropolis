@@ -11,7 +11,9 @@ def get_configuration():
     redis_db = int(os.environ.get('REDIS_DB', '0'))
     redis_url = 'redis://{}:{}/{}'.format(redis_host, redis_port, redis_db)
     #topics
-    topic_execution = os.environ.get('TOPIC_EXECUTION', 'una.py.runtime')
+    execution_topict = os.environ.get('EXECUTION_TOPICT', 'una.py.runtime')
+    # queue name
+    execution_queue = os.environ.get('EXECUTION_QUEUE', 'una_queue')
     
     return {
         'home_dir': home_dir,
@@ -23,7 +25,8 @@ def get_configuration():
         'redis_port': redis_port,
         'redis_db': redis_db,
         'redis_url': redis_url,
-        'topic_execution': topic_execution
+        'execution_topic': execution_topict,
+        'execution_queue': execution_queue
     }
 
 def configuration_setup():

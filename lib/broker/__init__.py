@@ -1,28 +1,21 @@
-from rq import Queue
-from rq.job import Job
 import redis
+import rq
 import json
 import uuid
+from lib.configuration.una_config import get_configuration
 
-from .configuration.una_config import get_configuration
 
-__redis_conn = None
-__redis_publisher = None
-
-def connection_init():
+# get connection to redis
+def get_connection():
     # This function initializes redis and the queue
-    global __redis_conn
-    global __redis_publisher
+    cfg = get_configuration()
+    return redis.StrictRedis(host=cfg['redis_host'], port=cfg['redis_port'], db=cfg['redis_db'])
+
+def get_connection_pool():
+    # This function initializes redis with connection pool option
     cfg = get_configuration()
     connection_pool = redis.ConnectionPool(host=cfg['redis_host'], port=cfg['redis_port'], db=cfg['redis_db'])
-    __redis_conn = redis.Redis(connection_pool=connection_pool)
-    __redis_publisher = redis.StrictRedis(host=cfg['redis_host'], port=cfg['redis_port'], db=cfg['redis_db'])
-
-def get_subscriber():
-    return __redis_conn
-
-def get_publisher():
-    return __redis_publisher
+    return connection_pool
 
 def create_message(script_path, requirements_path, venv_name, execution_dir, execution_id=uuid.uuid4()):
     # This function creates a message to be sent to the topic
@@ -48,5 +41,3 @@ def subscribe_to_topic(connection: redis.Connection, topic, handler):
     # TODO: handle client disconnection.
     for message in pubsub.listen():
         yield handler(message, message['data'])
-
-    

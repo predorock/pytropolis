@@ -1,10 +1,7 @@
 from flask import Blueprint, jsonify, request
-import redis
-from rq import Queue, Connection
 
-from lib.configuration.una_config import get_configuration
 from lib.blueprints.common import parse_request
-from lib.tasks.runner_task import python_env_runner_task
+from lib.tasks.runner_task import create_runner_task_payload, enqueue_runner_task
 
 queue_bp = Blueprint('queue_bp', __name__)
 
@@ -59,29 +56,11 @@ def enqueue_execution():
       400:
         description: Bad Request
     """
-
-    cfg = get_configuration()
-
     # parse the request
-    script_path, requirements_path, venv_name, execution_dir, execution_id = parse_request(request)
-    
-    # check if the files are not null
-    if script_path is None:
-        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Script file is null.'})
-    if requirements_path is None:
-        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Requirements file is null.'})
-    
-    data = {
-        'script_path': script_path,
-        'requirements_path': requirements_path,
-        'venv_name': venv_name,
-        'execution_dir': execution_dir,
-        'execution_id': str(execution_id)
-    }
-
-    # run the script
-    with Connection(redis.from_url(cfg['redis_url'])) as conn:
-        q = Queue(name='una_queue', connection=conn)
-        task = q.enqueue(python_env_runner_task, data)
+    script_path, requirements_path, venv_name, execution_dir, execution_id = parse_request(request) 
+    # create the payload
+    data = create_runner_task_payload(script_path, requirements_path, venv_name, execution_dir, execution_id)
+    # enqueue the job
+    task = enqueue_runner_task(data)
     
     return jsonify({'job': task.get_id(), 'result': 'success', 'message': 'Script enqueued.', 'data': data})

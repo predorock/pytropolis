@@ -13,10 +13,10 @@ def parse_request(request: flask.Request):
 
     # check if the files are not null
     if not script_file:
-        return None, None, None, None, None
-    
+        return flask.jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Script file is null.'})
+
     if not requirements_file:
-        return None, None, None, None, None
+        return flask.jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Requirements file is null.'})
 
     cfg = get_configuration()
 
@@ -43,7 +43,7 @@ def parse_request(request: flask.Request):
     script_path = os.path.join(execution_dir, f'{script_name}.py')
     script_file.save(script_path)
 
-    requirements_path = os.path.join(execution_dir, 'requirements.txt')
+    requirements_path = os.path.join(execution_dir, f'{script_name}_requirements.txt')
     requirements_file.save(requirements_path)
 
     return script_path, requirements_path, venv_name, execution_dir, execution_id

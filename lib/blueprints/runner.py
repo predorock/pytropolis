@@ -1,4 +1,4 @@
-from flask import jsonify, request, Blueprint
+from flask import request, Blueprint
 
 from lib.blueprints.common import parse_request
 from lib.runner import handle_script_execution
@@ -57,13 +57,6 @@ def run_script():
         description: Bad Request
     """
     # parse the request
-    script_path, requirements_path, venv_name, execution_dir, execution_id = parse_request(request)
-    
-    # check if the files are not null
-    if script_path is None:
-        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Script file is null.'})
-    if requirements_path is None:
-        return jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Requirements file is null.'})
-    
+    script_path, requirements_path, venv_name, execution_dir, execution_id = parse_request(request)    
     # run the script
     return handle_script_execution(script_path, requirements_path, venv_name, execution_id)
