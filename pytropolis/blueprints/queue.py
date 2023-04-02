@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
-from lib.blueprints.common import parse_request
-from lib.tasks.runner_task import create_runner_task_payload, enqueue_runner_task
+from pytropolis.blueprints.common import parse_request
+from pytropolis.tasks.runner_task import create_runner_task_payload, enqueue_runner_task
 
 queue_bp = Blueprint('queue_bp', __name__)
 

@@ -1,3 +1,3 @@
-export HOME_DIR=./volumes/una-py-runner/
-mkdir -p $HOME_DIR
+export PYT_HOME_DIR=./volumes/pytropolis/
+mkdir -p $PYT_HOME_DIR
 python app.py --debug $1

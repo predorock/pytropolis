@@ -2,8 +2,8 @@ import subprocess
 import os
 import uuid
 from flask import jsonify
-from lib.configuration.una_config import get_configuration
-from lib.runner.una_runner import install_dependencies, run_python_script, create_or_get_virtualenv_path, get_log_file_name
+from pytropolis.configuration import get_configuration
+from pytropolis.runner.venv import install_dependencies, run_python_script, create_or_get_virtualenv_path, get_log_file_name
 
 
 def handle_script_execution(script_path, requirements_path, venv_name, execution_id=uuid.uuid4()):

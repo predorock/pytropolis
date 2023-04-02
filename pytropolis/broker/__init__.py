@@ -2,7 +2,7 @@ import redis
 import rq
 import json
 import uuid
-from lib.configuration.una_config import get_configuration
+from pytropolis.configuration import get_configuration
 
 
 # get connection to redis

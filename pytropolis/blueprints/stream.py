@@ -1,7 +1,7 @@
 
 from flask import Blueprint, Response
-from lib.broker import get_connection
-from lib.configuration.una_config import get_configuration
+from pytropolis.broker import get_connection
+from pytropolis.configuration import get_configuration
 
 steam_bp = Blueprint('stream_bp', __name__)
 

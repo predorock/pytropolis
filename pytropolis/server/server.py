@@ -2,12 +2,12 @@ import os
 from flask import Flask
 
 # Blueprints
-from lib.blueprints.core import core
-from lib.blueprints.swagger import swaggerui_blueprint, SWAGGER_URL
-from lib.blueprints.runner import runner_bp
-from lib.blueprints.queue import queue_bp
-from lib.blueprints.stream import steam_bp
-from lib.blueprints.venv import venv_bp
+from pytropolis.blueprints.core import core
+from pytropolis.blueprints.swagger import swaggerui_blueprint, SWAGGER_URL
+from pytropolis.blueprints.runner import runner_bp
+from pytropolis.blueprints.queue import queue_bp
+from pytropolis.blueprints.stream import steam_bp
+from pytropolis.blueprints.venv import venv_bp
 
 def create_server():
     app = Flask(__name__,

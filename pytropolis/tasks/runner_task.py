@@ -2,8 +2,8 @@ import redis
 import uuid
 from rq import Queue, Connection
 
-from lib.runner import handle_script_execution
-from lib.configuration.una_config import get_configuration
+from pytropolis.runner import handle_script_execution
+from pytropolis.configuration import get_configuration
 
 
 def create_runner_task_payload(script_path, requirements_path, venv_name, execution_dir, execution_id=uuid.uuid4()):

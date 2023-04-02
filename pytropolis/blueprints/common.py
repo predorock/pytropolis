@@ -2,7 +2,7 @@ import os
 import uuid
 import flask
 
-from lib.configuration.una_config import get_configuration
+from pytropolis.configuration import get_configuration
 
 def parse_request(request: flask.Request):
     """

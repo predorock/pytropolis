@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, jsonify, request
-from lib.configuration.una_config import get_configuration
-from lib.runner.una_runner import create_or_get_virtualenv_path, install_dependencies
+from pytropolis.configuration import get_configuration
+from pytropolis.runner.venv import create_or_get_virtualenv_path, install_dependencies
 
 venv_bp = Blueprint('venv_bp', __name__)
 # returns the list of virtual environments

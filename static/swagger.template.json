@@ -2,6 +2,6 @@
     "swagger": "2.0",
     "info": {
         "version": "0.0.1",
-        "title": "Una Python Runtime"
+        "title": "Pytropolis"
     }
 }

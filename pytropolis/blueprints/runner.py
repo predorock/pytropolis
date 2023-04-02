@@ -1,7 +1,7 @@
 from flask import request, Blueprint
 
-from lib.blueprints.common import parse_request
-from lib.runner import handle_script_execution
+from pytropolis.blueprints.common import parse_request
+from pytropolis.runner import handle_script_execution
 
 runner_bp = Blueprint('runner_bp', __name__)
 

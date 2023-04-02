@@ -1,6 +1,6 @@
 ## Create a new instance of the MinioFileManager class
-from lib.fs.minio_fs import MinioFileManager
-from lib.configuration.una_config import get_configuration
+from pytropolis.fs.minio_fs import MinioFileManager
+from pytropolis.configuration import get_configuration
 
 def create_minio_file_manager():
     """
