@@ -1,7 +1,7 @@
 import json
 import requests
 
-url = 'http://localhost:5000/api/run'
+url = 'http://localhost:5000/api/runner/start'
 
 # Set up the files to send with the request
 script_file = open('../resources/hello/ascii_title.py', 'rb')
@@ -9,7 +9,8 @@ requirements_file = open('../resources/hello/requirements.txt', 'rb')
 
 data = {
     'script_name': 'ascii_title',
-    'venv_name': 'ascii_title'
+    'venv_name': 'ascii_title',
+    'env_params': json.dumps({'ART_title': 'PHEEGA!'}),
 }
 
 files = {'script': script_file, 'requirements': requirements_file}

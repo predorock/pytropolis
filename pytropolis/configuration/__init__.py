@@ -1,10 +1,10 @@
 import os
 
 def get_configuration():
-    home_dir = os.environ.get('PYT_HOME_DIR', os.path.join(os.getcwd(), 'pytropolis'))
+    home_dir = os.environ.get('PYT_HOME_DIR', os.path.join(os.getcwd(), 'volumes', 'pytropolis'))
     execution_dir = os.environ.get('PYT_EXECUTION_DIR', os.path.join(os.getcwd(), home_dir, 'executions'))
     log_dir = os.environ.get('PYT_LOG_DIR', os.path.join(os.getcwd(), home_dir, 'logs'))
-    venv_container = os.environ.get('PYT_VENV_CONTAINER', os.path.join(os.getcwd(), home_dir, 'pytropolis_venv_container'))
+    venv_container = os.environ.get('PYT_VENV_CONTAINER', os.path.join(os.getcwd(), home_dir, 'venv_container'))
     venv_default = os.path.join(venv_container, 'default')
     redis_host = os.environ.get('PYT_REDIS_HOST', 'localhost')
     redis_port = int(os.environ.get('PYT_REDIS_PORT', '6379'))

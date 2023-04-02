@@ -4,7 +4,7 @@ from flask.cli import FlaskGroup
 from rq import Connection, Worker
 import os
 
-from pytropolis.server.server import create_server
+from pytropolis import create_server
 from pytropolis.configuration import configuration_setup
 from pytropolis.runner.venv import create_or_get_virtualenv_path
 

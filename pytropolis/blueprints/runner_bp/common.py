@@ -13,24 +13,19 @@ def parse_request(request: flask.Request):
 
     # check if the files are not null
     if not script_file:
-        return flask.jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Script file is null.'})
+        return flask.jsonify({'output_log': None, 'venv_name': None, 'result': 'error', 'message': 'Script file is null.'})
 
     if not requirements_file:
-        return flask.jsonify({'output_log': None, 'venv_name': venv_name, 'result': 'error', 'message': 'Requirements file is null.'})
+        return flask.jsonify({'output_log': None, 'venv_name': None, 'result': 'error', 'message': 'Requirements file is null.'})
 
     cfg = get_configuration()
 
     # retrieve optional configurations
-    try:
-        venv_name = request.form.get('venv_name')
-    except KeyError:
-        venv_name = 'default'
-    
-    try:
-        script_name = request.form.get('script_name')
-    except KeyError:
-        script_name = 'algo'
-    
+    venv_name = request.form.get('venv_name', 'default')
+    script_name = request.form.get('script_name', 'algo')
+    env_params = request.form.get('env_params', None)
+    command = request.form.get('command', script_name)
+   
     # create an exectution directory with uuid
     execution_id = str(uuid.uuid4())
     execution_dir = os.path.join(cfg['execution_dir'],f'{script_name}_{execution_id}')
@@ -43,7 +38,16 @@ def parse_request(request: flask.Request):
     script_path = os.path.join(execution_dir, f'{script_name}.py')
     script_file.save(script_path)
 
+    # Save requirements file to disk
     requirements_path = os.path.join(execution_dir, f'{script_name}_requirements.txt')
     requirements_file.save(requirements_path)
-
-    return script_path, requirements_path, venv_name, execution_dir, execution_id
+    
+    return {
+            "script_path": script_path, 
+            "requirements_path": requirements_path, 
+            "venv_name": venv_name, 
+            "execution_dir": execution_dir, 
+            "execution_id": execution_id,
+            "env_params": env_params,
+            "command": command
+    }

@@ -16,7 +16,7 @@
                 }
             }
         },
-        "/api/run": {
+        "/api/runner/start": {
             "post": {
                 "summary": "Execute a script",
                 "description": "",
@@ -61,14 +61,33 @@
                         "required": false,
                         "default": "algo",
                         "description": "The name of the script."
+                    },
+                    {
+                        "name": "env_params",
+                        "in": "formData",
+                        "type": "JSON",
+                        "required": false,
+                        "default": {},
+                        "description": "The environment parameters to use."
+                    },
+                    {
+                        "name": "command",
+                        "in": "formData",
+                        "type": "string",
+                        "required": false,
+                        "default": "same as script_name",
+                        "description": "The command customisation to use."
                     }
+                ],
+                "tags": [
+                    "Runner API"
                 ],
                 "consumes": [
                     "multipart/form-data"
                 ]
             }
         },
-        "/api/enqueue": {
+        "/api/runner/enqueue": {
             "post": {
                 "summary": "Enqueue a script",
                 "description": "",
@@ -113,7 +132,26 @@
                         "required": false,
                         "default": "algo",
                         "description": "The name of the script."
+                    },
+                    {
+                        "name": "env_params",
+                        "in": "formData",
+                        "type": "JSON",
+                        "required": false,
+                        "default": {},
+                        "description": "The environment parameters to use."
+                    },
+                    {
+                        "name": "command",
+                        "in": "formData",
+                        "type": "string",
+                        "required": false,
+                        "default": "same as script name",
+                        "description": "The command customisation to use."
                     }
+                ],
+                "tags": [
+                    "Runner API"
                 ],
                 "consumes": [
                     "multipart/form-data"
@@ -131,7 +169,10 @@
                             "$ref": "#/definitions/venv_list"
                         }
                     }
-                }
+                },
+                "tags": [
+                    "Virtual Environment API"
+                ]
             },
             "post": {
                 "summary": "Create a new virtual environment",
@@ -154,7 +195,54 @@
                         "type": "string",
                         "required": true,
                         "description": "The name of the virtual environment to create."
+                    },
+                    {
+                        "name": "requirements_file",
+                        "in": "formData",
+                        "type": "file",
+                        "required": false,
+                        "description": "The requirements file for the virtual environment."
                     }
+                ],
+                "tags": [
+                    "Virtual Environment API"
+                ],
+                "consumes": [
+                    "multipart/form-data"
+                ]
+            },
+            "put": {
+                "summary": "Update a virtual environment with a requirements file",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/venv_creation_result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "venv_name",
+                        "in": "formData",
+                        "type": "string",
+                        "required": true,
+                        "description": "The name of the virtual environment to create."
+                    },
+                    {
+                        "name": "requirements_file",
+                        "in": "formData",
+                        "type": "file",
+                        "required": false,
+                        "description": "The requirements file for the virtual environment."
+                    }
+                ],
+                "tags": [
+                    "Virtual Environment API"
                 ],
                 "consumes": [
                     "multipart/form-data"
@@ -179,6 +267,9 @@
                         "required": true,
                         "description": "The name of the virtual environment to delete."
                     }
+                ],
+                "tags": [
+                    "Virtual Environment API"
                 ],
                 "consumes": [
                     "multipart/form-data"

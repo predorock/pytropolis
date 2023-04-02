@@ -1,7 +1,7 @@
 import os
 import subprocess
-import logging
 import uuid
+import json
 
 def activate_virtualenv(venv_path):
     """
@@ -38,28 +38,19 @@ def install_dependencies(requirements_path, venv_path):
     pip_path = os.path.join(venv_path, 'bin', 'pip') if venv_path else 'pip'
     subprocess.check_output([pip_path, 'install', '-r', requirements_path])
 
-
-def run_python_script(script_path, log_file_path, venv_path):
+def get_installed_libraries(venv_path):
     """
-    Runs the specified Python script using the Python interpreter in the fixed virtual environment,
-    and redirects the logs to a file.
+    Returns a list of the libraries installed in the specified virtual environment.
     """
-    logging.basicConfig(level=logging.INFO)
-    logging.info(f"Running script {script_path} in virtual environment {venv_path}...")
-
-    # Open the process with the subprocess.PIPE stdout
-    process = subprocess.Popen([os.path.join(venv_path, 'bin', 'python'), script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # Read the output of the process
-    output, _ = process.communicate()
-    # Write the output to the log file
-    with open(log_file_path, 'w') as f:
-        f.write(output.decode())
-
-    return output
+    pip_path = os.path.join(venv_path, 'bin', 'pip') if venv_path else 'pip'
+    pip_list_cmd = f'{pip_path} list --format=json'
+    output = subprocess.check_output(pip_list_cmd, shell=True)
+    # serialize the output
+    libraries = json.loads(output.decode())    
+    return libraries
 
 def get_log_file_name(script_name, execution_id=uuid.uuid4()):
     """
     Returns a unique log file name with the specified script name as prefix.
     """
     return f"{script_name.split('.')[0]}_{str(execution_id)}.log"
-

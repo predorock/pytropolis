@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, jsonify, request
 from pytropolis.configuration import get_configuration
-from pytropolis.runner.venv import create_or_get_virtualenv_path, install_dependencies
+from pytropolis.runner.venv import create_or_get_virtualenv_path, install_dependencies, get_installed_libraries
 
 venv_bp = Blueprint('venv_bp', __name__)
 # returns the list of virtual environments
@@ -10,6 +10,8 @@ def get_venv_list():
     """
     Get the list of virtual environments
     ---
+    tags:
+      - Virtual Environment API
     responses:
       200:
         description: Success
@@ -28,12 +30,10 @@ def get_venv_list():
     venv_list = [venv for venv in os.listdir(venv_container_path) if os.path.isdir(os.path.join(venv_container_path, venv))]
     # get the installed packages for each virtual environment
     data = {}
+    
     for venv in venv_list:
-        venv_path = os.path.join(venv_container_path, venv)
-        # get the list of installed packages
-        venv_packages = [package for package in os.listdir(os.path.join(venv_path, 'lib', 'python3.8', 'site-packages')) if os.path.isdir(os.path.join(venv_path, 'lib', 'python3.8', 'site-packages', package))]
-        # add the list of installed packages to the virtual environment
-        data[venv] = venv_packages
+        data[venv] = get_installed_libraries(os.path.join(venv_container_path, venv))
+
     # return the list of virtual environments
     return jsonify({'venv_list': data})
 
@@ -44,6 +44,8 @@ def create_venv():
     """
     Create a new virtual environment
     ---
+    tags:
+      - Virtual Environment API
     consumes:
       - multipart/form-data
     parameters:
@@ -52,6 +54,11 @@ def create_venv():
         type: string
         required: true
         description: The name of the virtual environment to create.
+      - name: requirements_file
+        in: formData
+        type: file
+        required: false
+        description: The requirements file for the virtual environment.
     responses:
       200:
         description: Success
@@ -85,6 +92,36 @@ def create_venv():
 def update_venv():
     """
     Update a virtual environment with a requirements file
+    ---
+    tags:
+      - Virtual Environment API
+    consumes:
+      - multipart/form-data
+    parameters:
+      - name: venv_name
+        in: formData
+        type: string
+        required: true
+        description: The name of the virtual environment to create.
+      - name: requirements_file
+        in: formData
+        type: file
+        required: false
+        description: The requirements file for the virtual environment.
+    responses:
+      200:
+        description: Success
+        schema:
+          id: venv_creation_result
+          properties:
+            message:
+              type: string
+              description: A message describing the result of the virtual environment creation.
+            venv_path:
+              type: string
+              description: The path to the virtual environment.
+      400:
+        description: Bad Request
     """
     # get virtual environment name
     venv_name = request.form['venv_name']
@@ -108,6 +145,8 @@ def delete_venv():
     """
     Delete a virtual environment
     ---
+    tags:
+      - Virtual Environment API
     consumes:
       - multipart/form-data
     parameters:
