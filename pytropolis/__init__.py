@@ -12,6 +12,9 @@ def create_server():
     app = Flask(__name__,
                 static_folder=os.path.join(os.getcwd(), "static"),
                 template_folder=os.path.join(os.getcwd(), "templates"))
+    
+    app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+
     app.register_blueprint(core)
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
     app.register_blueprint(runner_bp)

@@ -45,12 +45,12 @@ def run_script():
         required: false
         default: {}
         description: The environment parameters to use.
-      - name: command
+      - name: script_args
         in: formData
-        type: string
+        type: JSON
         required: false
-        default: same as script_name
-        description: The command customisation to use.
+        default: {}
+        description: The arguments to pass to the script.
     responses:
       200:
         description: Success
@@ -75,7 +75,7 @@ def run_script():
     # parse the request
     request_params = parse_request(request)    
     # run the script
-    return handle_script_execution(request_params['script_path'], request_params['requirements_path'], request_params['venv_name'], request_params['execution_id'], request_params['env_params'])
+    return handle_script_execution(request_params['script_path'], request_params['requirements_path'], request_params['venv_name'], request_params['execution_id'], env_vars=request_params['env_vars'], script_argv=request_params['script_argv'])
 
 @runner_bp.route('/enqueue', methods=['POST'])
 def enqueue_execution():
@@ -115,12 +115,12 @@ def enqueue_execution():
         required: false
         default: {}
         description: The environment parameters to use.
-      - name: command
+      - name: script_args
         in: formData
-        type: string
+        type: JSON
         required: false
-        default: same as script name
-        description: The command customisation to use.
+        default: {}
+        description: The arguments to pass to the script.
     responses:
       200:
         description: Success

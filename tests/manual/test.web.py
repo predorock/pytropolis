@@ -10,7 +10,8 @@ requirements_file = open('../resources/hello/requirements.txt', 'rb')
 data = {
     'script_name': 'ascii_title',
     'venv_name': 'ascii_title',
-    'env_params': json.dumps({'ART_title': 'PHEEGA!'}),
+    'env_vars': json.dumps({'ART_title': 'TITOLO FIGO'}),
+    'script_argv': json.dumps({'subtitle': 'SOTTOTITOLO DI MERDA'})
 }
 
 files = {'script': script_file, 'requirements': requirements_file}

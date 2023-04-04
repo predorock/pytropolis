@@ -1,6 +1,7 @@
 import os
 import uuid
 import flask
+import json
 
 from pytropolis.configuration import get_configuration
 
@@ -23,8 +24,13 @@ def parse_request(request: flask.Request):
     # retrieve optional configurations
     venv_name = request.form.get('venv_name', 'default')
     script_name = request.form.get('script_name', 'algo')
-    env_params = request.form.get('env_params', None)
-    command = request.form.get('command', script_name)
+    script_argv = request.form.get('script_argv', None)
+    env_vars = request.form.get('env_vars', None)
+
+    if script_argv:
+        script_argv = json.loads(script_argv)
+    if env_vars:
+        env_vars = json.loads(env_vars)
    
     # create an exectution directory with uuid
     execution_id = str(uuid.uuid4())
@@ -48,6 +54,6 @@ def parse_request(request: flask.Request):
             "venv_name": venv_name, 
             "execution_dir": execution_dir, 
             "execution_id": execution_id,
-            "env_params": env_params,
-            "command": command
+            "env_vars": env_vars,
+            "script_argv": script_argv
     }
