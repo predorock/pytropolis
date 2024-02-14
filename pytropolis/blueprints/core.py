@@ -23,5 +23,12 @@ def health():
 
 @core.route('/files/<path:path>', methods=['GET'])
 def send_report(path):
+    """
+    Download a file from a given path
+    ---
+    responses:
+      200:
+        description: OK
+    """
     s_folder = os.path.join(os.getcwd(), 'static')
     return send_from_directory(s_folder, path)

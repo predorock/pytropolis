@@ -15,4 +15,11 @@ def event_stream():
 
 @steam_bp.route('/api/stream')
 def stream():
+    """
+    Event stream of the execution queue
+    ---
+    responses:
+      200:
+        description: OK
+    """
     return Response(event_stream(), mimetype="text/event-stream")

@@ -1,0 +1,65 @@
+version: '3.7'
+
+services:
+  
+  redis:
+    container_name: redis_py
+    image: redis:latest
+    hostname: redis
+    ports:
+      - 6379:6379
+    networks:
+      - pytropolis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  worker:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    environment:
+      - PYT_HOME_DIR=/opt/PYT
+      - PYT_EXECUTION_DIR=/opt/PYT/execution
+      - PYT_LOG_DIR=/opt/PYT/log
+      - PYT_VENV_CONTAINER=/opt/PYT/venv
+      - PYT_REDIS_HOST=redis
+    volumes:
+      - ./volumes/PYT:/opt/PYT
+    depends_on:
+      - redis
+    command: ["python", "app.py", "run_worker"]
+    networks:
+      - pytropolis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      mode: replicated
+      replicas: 3
+  
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - 5000:5000
+    environment:
+      - PYT_HOME_DIR=/opt/PYT
+      - PYT_EXECUTION_DIR=/opt/PYT/execution
+      - PYT_LOG_DIR=/opt/PYT/log
+      - PYT_VENV_CONTAINER=/opt/PYT/venv
+      - PYT_REDIS_HOST=redis
+      - FLASK_RUN_HOST=0.0.0.0
+    volumes:
+      - ./volumes/PYT:/opt/PYT
+    depends_on:
+      - redis
+    command: ["python", "app.py", "run"]
+    networks:
+      - pytropolis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  
+networks:
+  pytropolis:
+    external: true
+    name: pytropolis

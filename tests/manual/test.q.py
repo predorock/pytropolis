@@ -1,7 +1,7 @@
 import json
 import requests
 
-url = 'http://localhost:5000/api/enqueue'
+url = 'http://localhost:5000/api/runner/enqueue'
 
 # Set up the files to send with the request
 script_file = open('../resources/hello/ascii_title.py', 'rb')

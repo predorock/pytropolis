@@ -1,8 +1,7 @@
 from flask import request, Blueprint, jsonify
 
 from pytropolis.runner import handle_script_execution
-from pytropolis.tasks.runner_task import create_runner_task_payload, enqueue_runner_task
-
+from pytropolis.tasks.runner_task import enqueue_runner_task
 from pytropolis.blueprints.runner_bp.common import parse_request
 
 runner_bp = Blueprint('runner_bp', __name__, url_prefix='/api/runner')

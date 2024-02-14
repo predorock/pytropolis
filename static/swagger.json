@@ -16,6 +16,17 @@
                 }
             }
         },
+        "/files/{path}": {
+            "get": {
+                "summary": "Download a file from a given path",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/runner/start": {
             "post": {
                 "summary": "Execute a script",
@@ -71,12 +82,12 @@
                         "description": "The environment parameters to use."
                     },
                     {
-                        "name": "command",
+                        "name": "script_args",
                         "in": "formData",
-                        "type": "string",
+                        "type": "JSON",
                         "required": false,
-                        "default": "same as script_name",
-                        "description": "The command customisation to use."
+                        "default": {},
+                        "description": "The arguments to pass to the script."
                     }
                 ],
                 "tags": [
@@ -142,12 +153,12 @@
                         "description": "The environment parameters to use."
                     },
                     {
-                        "name": "command",
+                        "name": "script_args",
                         "in": "formData",
-                        "type": "string",
+                        "type": "JSON",
                         "required": false,
-                        "default": "same as script name",
-                        "description": "The command customisation to use."
+                        "default": {},
+                        "description": "The arguments to pass to the script."
                     }
                 ],
                 "tags": [
@@ -156,6 +167,17 @@
                 "consumes": [
                     "multipart/form-data"
                 ]
+            }
+        },
+        "/api/stream": {
+            "get": {
+                "summary": "Event stream of the execution queue",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
             }
         },
         "/api/venv": {
@@ -274,6 +296,17 @@
                 "consumes": [
                     "multipart/form-data"
                 ]
+            }
+        },
+        "/api/status": {
+            "get": {
+                "summary": "Get the status of the execution workers",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
             }
         }
     },
